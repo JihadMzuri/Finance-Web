@@ -1,0 +1,2098 @@
+```jsx
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plus, Lock, Unlock, Edit, Trash2, Download, Calendar, Filter, Settings, FileText, Users, Building, BarChart3, TrendingUp, TrendingDown, AlertCircle, X, Save, User, Mail, Phone, MapPin, Calculator, Type, Info, MessageCircle } from 'lucide-react';
+
+const App = () => {
+  // State management
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [journalEntries, setJournalEntries] = useState([
+    {
+      id: 1,
+      date: '2025-01-01',
+      lines: [
+        { account: '1010', debit: 25000, credit: 0, description: 'Owner Capital Contribution' },
+        { account: '1020', debit: 25000, credit: 0, description: 'Owner Capital Contribution' },
+        { account: '3010', debit: 0, credit: 50000, description: 'Owner’s Investment in Business' }
+      ]
+    }
+  ]);
+  
+  const [chartOfAccounts, setChartOfAccounts] = useState([
+    { code: '1010', name: 'Cash', type: 'Asset', normalBalance: 'Debit', category: 'Current Asset' },
+    { code: '1020', name: 'Bank Account', type: 'Asset', normalBalance: 'Debit', category: 'Current Asset' },
+    { code: '1030', name: 'Accounts Receivable', type: 'Asset', normalBalance: 'Debit', category: 'Current Asset' },
+    { code: '1040', name: 'Prepaid Expenses', type: 'Asset', normalBalance: 'Debit', category: 'Current Asset' },
+    { code: '1050', name: 'Office Equipment', type: 'Asset', normalBalance: 'Debit', category: 'Fixed Asset' },
+    { code: '1060', name: 'Accumulated Depreciation', type: 'Asset', normalBalance: 'Credit', category: 'Contra Asset' },
+    { code: '2010', name: 'Accounts Payable', type: 'Liability', normalBalance: 'Credit', category: 'Current Liability' },
+    { code: '2020', name: 'Accrued Expenses', type: 'Liability', normalBalance: 'Credit', category: 'Current Liability' },
+    { code: '2030', name: 'Unearned Revenue', type: 'Liability', normalBalance: 'Credit', category: 'Current Liability' },
+    { code: '2040', name: 'Short-Term Loan', type: 'Liability', normalBalance: 'Credit', category: 'Current Liability' },
+    { code: '2050', name: 'Long-Term Loan', type: 'Liability', normalBalance: 'Credit', category: 'Long-term Liability' },
+    { code: '3010', name: "Owner's Capital", type: 'Equity', normalBalance: 'Credit', category: 'Equity' },
+    { code: '3020', name: 'Retained Earnings', type: 'Equity', normalBalance: 'Credit', category: 'Equity' },
+    { code: '3030', name: 'Net Current Income', type: 'Equity', normalBalance: 'Credit', category: 'Equity' },
+    { code: '4010', name: 'Service Revenue - Web Development', type: 'Revenue', normalBalance: 'Credit', category: 'Revenue' },
+    { code: '4020', name: 'Consulting Revenue', type: 'Revenue', normalBalance: 'Credit', category: 'Revenue' },
+    { code: '4030', name: 'Maintenance Income', type: 'Revenue', normalBalance: 'Credit', category: 'Revenue' },
+    { code: '5010', name: 'Developer Salaries', type: 'COGS', normalBalance: 'Debit', category: 'COGS' },
+    { code: '5020', name: 'Hosting & Server Costs', type: 'COGS', normalBalance: 'Debit', category: 'COGS' },
+    { code: '5030', name: 'Software Subscriptions', type: 'COGS', normalBalance: 'Debit', category: 'COGS' },
+    { code: '5040', name: 'Subcontractor Fees', type: 'COGS', normalBalance: 'Debit', category: 'COGS' },
+    { code: '6010', name: 'Rent Expense', type: 'Expense', normalBalance: 'Debit', category: 'Operating Expense' },
+    { code: '6020', name: 'Utilities Expense', type: 'Expense', normalBalance: 'Debit', category: 'Operating Expense' },
+    { code: '6030', name: 'Office Supplies Expense', type: 'Expense', normalBalance: 'Debit', category: 'Operating Expense' },
+    { code: '6040', name: 'Marketing Expense', type: 'Expense', normalBalance: 'Debit', category: 'Operating Expense' },
+    { code: '6050', name: 'Professional Fees', type: 'Expense', normalBalance: 'Debit', category: 'Operating Expense' },
+    { code: '6060', name: 'Bank Charges', type: 'Expense', normalBalance: 'Debit', category: 'Operating Expense' },
+    { code: '6070', name: 'Depreciation Expense', type: 'Expense', normalBalance: 'Debit', category: 'Operating Expense' },
+    { code: '7010', name: 'Other Income', type: 'Other Income', normalBalance: 'Credit', category: 'Other Income' },
+    { code: '7020', name: 'Other Expenses', type: 'Other Expense', normalBalance: 'Debit', category: 'Other Expense' }
+  ]);
+  
+  const [newAccount, setNewAccount] = useState({ code: '', name: '', type: 'Asset', normalBalance: 'Debit', category: 'Current Asset' });
+  const [showNewAccountForm, setShowNewAccountForm] = useState(false);
+  const [companyLogo, setCompanyLogo] = useState(null);
+  const [dashboardLocked, setDashboardLocked] = useState(false);
+  const [windowColors, setWindowColors] = useState({
+    dashboard: 'bg-blue-50',
+    journal: 'bg-green-50',
+    tAccounts: 'bg-purple-50',
+    trialBalance: 'bg-yellow-50',
+    profitLoss: 'bg-red-50',
+    balanceSheet: 'bg-indigo-50',
+    chartOfAccounts: 'bg-pink-50',
+    notes: 'bg-teal-50',
+    customersVendors: 'bg-orange-50'
+  });
+  const [selectedColors, setSelectedColors] = useState({
+    dashboard: 'blue',
+    journal: 'green',
+    tAccounts: 'purple',
+    trialBalance: 'yellow',
+    profitLoss: 'red',
+    balanceSheet: 'indigo',
+    chartOfAccounts: 'pink',
+    notes: 'teal',
+    customersVendors: 'orange'
+  });
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [settingsTab, setSettingsTab] = useState('color');
+  
+  const [dateRange, setDateRange] = useState({ startDate: '2025-01-01', endDate: '2025-12-31' });
+  const [currentDate, setCurrentDate] = useState('2025-01-01');
+  const [isRunning, setIsRunning] = useState(false);
+  
+  const [customers, setCustomers] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  const [bills, setBills] = useState([]);
+  
+  const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '', address: '' });
+  const [newVendor, setNewVendor] = useState({ name: '', email: '', phone: '', address: '' });
+  const [newInvoice, setNewInvoice] = useState({ date: '', dueDate: '', customerId: '', amount: 0, description: '', revenueAccount: '4010' });
+  const [newBill, setNewBill] = useState({ date: '', dueDate: '', vendorId: '', amount: 0, description: '', expenseAccount: '5010' });
+  
+  const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [showVendorForm, setShowVendorForm] = useState(false);
+  const [showInvoiceForm, setShowInvoiceForm] = useState(false);
+  const [showBillForm, setShowBillForm] = useState(false);
+  
+  const [professionalNotes, setProfessionalNotes] = useState([]);
+  const [newNote, setNewNote] = useState({ title: 'New Note', content: '' });
+  const [showNoteForm, setShowNoteForm] = useState(false);
+  
+  // Font options
+  const fontOptions = ['Inter', 'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Poppins'];
+  const [selectedFont, setSelectedFont] = useState('Inter');
+  
+  // Color options
+  const colorOptions = [
+    { name: 'blue', class: 'bg-blue-50 border-blue-200' },
+    { name: 'green', class: 'bg-green-50 border-green-200' },
+    { name: 'purple', class: 'bg-purple-50 border-purple-200' },
+    { name: 'yellow', class: 'bg-yellow-50 border-yellow-200' },
+    { name: 'red', class: 'bg-red-50 border-red-200' },
+    { name: 'indigo', class: 'bg-indigo-50 border-indigo-200' },
+    { name: 'pink', class: 'bg-pink-50 border-pink-200' },
+    { name: 'teal', class: 'bg-teal-50 border-teal-200' },
+    { name: 'orange', class: 'bg-orange-50 border-orange-200' },
+    { name: 'gray', class: 'bg-gray-50 border-gray-200' }
+  ];
+  
+  // Calculate T-Accounts
+  const calculateTAcounts = useMemo(() => {
+    const tAccounts = {};
+    
+    // Initialize all accounts
+    chartOfAccounts.forEach(account => {
+      tAccounts[account.code] = {
+        code: account.code,
+        name: account.name,
+        type: account.type,
+        normalBalance: account.normalBalance,
+        transactions: [],
+        balance: 0
+      };
+    });
+    
+    // Process journal entries within date range
+    const filteredEntries = journalEntries.filter(entry => 
+      entry.date >= dateRange.startDate && entry.date <= dateRange.endDate
+    );
+    
+    filteredEntries.forEach(entry => {
+      entry.lines.forEach(line => {
+        if (!tAccounts[line.account]) return;
+        
+        const transaction = {
+          date: entry.date,
+          description: line.description,
+          debit: line.debit,
+          credit: line.credit
+        };
+        
+        tAccounts[line.account].transactions.push(transaction);
+        
+        if (tAccounts[line.account].normalBalance === 'Debit') {
+          tAccounts[line.account].balance += line.debit - line.credit;
+        } else {
+          tAccounts[line.account].balance += line.credit - line.debit;
+        }
+      });
+    });
+    
+    // Handle Net Current Income account (3030) - link P&L to Balance Sheet
+    const revenueAccounts = Object.values(tAccounts).filter(acc => acc.type === 'Revenue');
+    const cogsAccounts = Object.values(tAccounts).filter(acc => acc.type === 'COGS');
+    const expenseAccounts = Object.values(tAccounts).filter(acc => acc.type === 'Expense');
+    const otherIncomeAccounts = Object.values(tAccounts).filter(acc => acc.type === 'Other Income');
+    const otherExpenseAccounts = Object.values(tAccounts).filter(acc => acc.type === 'Other Expense');
+    
+    const totalRevenue = revenueAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalCOGS = cogsAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalExpenses = expenseAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalOtherIncome = otherIncomeAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalOtherExpenses = otherExpenseAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    
+    const netProfit = totalRevenue - totalCOGS - totalExpenses + totalOtherIncome - totalOtherExpenses;
+    
+    if (tAccounts['3030']) {
+      tAccounts['3030'].balance = netProfit;
+      tAccounts['3030'].transactions = [{
+        date: dateRange.endDate,
+        description: 'Net Current Income (P&L Link)',
+        debit: netProfit < 0 ? Math.abs(netProfit) : 0,
+        credit: netProfit > 0 ? netProfit : 0
+      }];
+    }
+    
+    return Object.values(tAccounts);
+  }, [journalEntries, chartOfAccounts, dateRange, isRunning]);
+  
+  // Calculate Trial Balance (excluding Net Current Income)
+  const trialBalance = useMemo(() => {
+    const totals = { debit: 0, credit: 0 };
+    const accounts = calculateTAcounts
+      .filter(account => account.code !== '3030') // Exclude Net Current Income from Trial Balance
+      .map(account => {
+        const balance = Math.abs(account.balance);
+        if ((account.normalBalance === 'Debit' && account.balance >= 0) || 
+            (account.normalBalance === 'Credit' && account.balance < 0)) {
+          totals.debit += balance;
+          return { ...account, debit: balance, credit: 0 };
+        } else {
+          totals.credit += balance;
+          return { ...account, debit: 0, credit: balance };
+        }
+      });
+    
+    return { accounts, totals };
+  }, [calculateTAcounts]);
+  
+  // Calculate Financial Statements
+  const financialStatements = useMemo(() => {
+    const revenueAccounts = calculateTAcounts.filter(acc => acc.type === 'Revenue');
+    const cogsAccounts = calculateTAcounts.filter(acc => acc.type === 'COGS');
+    const expenseAccounts = calculateTAcounts.filter(acc => acc.type === 'Expense');
+    const otherIncomeAccounts = calculateTAcounts.filter(acc => acc.type === 'Other Income');
+    const otherExpenseAccounts = calculateTAcounts.filter(acc => acc.type === 'Other Expense');
+    
+    const totalRevenue = revenueAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalCOGS = cogsAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalExpenses = expenseAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalOtherIncome = otherIncomeAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const totalOtherExpenses = otherExpenseAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    
+    const grossProfit = totalRevenue - totalCOGS;
+    const operatingProfit = grossProfit - totalExpenses;
+    const netProfit = operatingProfit + totalOtherIncome - totalOtherExpenses;
+    
+    return {
+      incomeStatement: {
+        revenue: totalRevenue,
+        cogs: totalCOGS,
+        grossProfit,
+        expenses: totalExpenses,
+        operatingProfit,
+        otherIncome: totalOtherIncome,
+        otherExpenses: totalOtherExpenses,
+        netProfit
+      },
+      balanceSheet: {
+        assets: calculateTAcounts.filter(acc => acc.type === 'Asset').reduce((sum, acc) => sum + (acc.normalBalance === 'Debit' ? acc.balance : -acc.balance), 0),
+        liabilities: calculateTAcounts.filter(acc => acc.type === 'Liability').reduce((sum, acc) => sum + (acc.normalBalance === 'Credit' ? acc.balance : -acc.balance), 0),
+        equity: calculateTAcounts.filter(acc => acc.type === 'Equity').reduce((sum, acc) => sum + (acc.normalBalance === 'Credit' ? acc.balance : -acc.balance), 0)
+      }
+    };
+  }, [calculateTAcounts]);
+  
+  // Dashboard metrics
+  const dashboardMetrics = useMemo(() => {
+    const cashAccounts = calculateTAcounts.filter(acc => ['1010', '1020'].includes(acc.code));
+    const cashPosition = cashAccounts.reduce((sum, acc) => sum + acc.balance, 0);
+    
+    const arAccount = calculateTAcounts.find(acc => acc.code === '1030');
+    const apAccount = calculateTAcounts.find(acc => acc.code === '2010');
+    
+    const today = new Date().toISOString().split('T')[0];
+    const todayEntries = journalEntries.filter(entry => 
+      entry.date === today && 
+      entry.date >= dateRange.startDate && 
+      entry.date <= dateRange.endDate
+    );
+    
+    return {
+      cashPosition,
+      netIncome: financialStatements.incomeStatement.netProfit,
+      accountsReceivable: arAccount ? arAccount.balance : 0,
+      accountsPayable: apAccount ? apAccount.balance : 0,
+      todayJournalCount: todayEntries.length
+    };
+  }, [calculateTAcounts, journalEntries, financialStatements, dateRange, isRunning]);
+  
+  // Handle new journal entry
+  const [newJournalEntry, setNewJournalEntry] = useState({
+    date: currentDate,
+    lines: [
+      { account: '', debit: '', credit: '', description: '' },
+      { account: '', debit: '', credit: '', description: '' }
+    ]
+  });
+  
+  const addJournalLine = () => {
+    setNewJournalEntry(prev => ({
+      ...prev,
+      lines: [...prev.lines, { account: '', debit: '', credit: '', description: '' }]
+    }));
+  };
+  
+  const updateJournalLine = (index, field, value) => {
+    setNewJournalEntry(prev => {
+      const newLines = [...prev.lines];
+      newLines[index][field] = value;
+      return { ...prev, lines: newLines };
+    });
+  };
+  
+  const validateJournalEntry = () => {
+    const lines = newJournalEntry.lines;
+    
+    // Check if all required fields are filled
+    for (let i = 0; i < lines.length; i++) {
+      if (!lines[i].account) {
+        return { valid: false, error: `Line ${i + 1}: Account is required` };
+      }
+      if (lines[i].debit === '' && lines[i].credit === '') {
+        return { valid: false, error: `Line ${i + 1}: Either debit or credit amount is required` };
+      }
+    }
+    
+    // Check if entry balances
+    const totalDebit = lines.reduce((sum, line) => sum + (parseFloat(line.debit) || 0), 0);
+    const totalCredit = lines.reduce((sum, line) => sum + (parseFloat(line.credit) || 0), 0);
+    
+    if (Math.abs(totalDebit - totalCredit) > 0.01) {
+      return { valid: false, error: `Journal entry does not balance. Debit: ${totalDebit}, Credit: ${totalCredit}` };
+    }
+    
+    return { valid: true, error: null };
+  };
+  
+  const saveJournalEntry = () => {
+    const validation = validateJournalEntry();
+    if (!validation.valid) {
+      alert(validation.error);
+      return;
+    }
+    
+    const entry = {
+      id: Date.now(),
+      date: newJournalEntry.date,
+      lines: newJournalEntry.lines.map(line => ({
+        ...line,
+        debit: parseFloat(line.debit) || 0,
+        credit: parseFloat(line.credit) || 0
+      }))
+    };
+    
+    setJournalEntries(prev => [...prev, entry]);
+    setNewJournalEntry({
+      date: currentDate,
+      lines: [
+        { account: '', debit: '', credit: '', description: '' },
+        { account: '', debit: '', credit: '', description: '' }
+      ]
+    });
+  };
+  
+  // Edit journal entry
+  const [editingEntry, setEditingEntry] = useState(null);
+  
+  const startEditEntry = (entry) => {
+    setEditingEntry({
+      id: entry.id,
+      date: entry.date,
+      lines: entry.lines.map(line => ({
+        ...line,
+        debit: line.debit.toString(),
+        credit: line.credit.toString()
+      }))
+    });
+  };
+  
+  const saveEditedEntry = () => {
+    if (!editingEntry) return;
+    
+    const validation = validateJournalEntry();
+    if (!validation.valid) {
+      alert(validation.error);
+      return;
+    }
+    
+    const updatedEntry = {
+      ...editingEntry,
+      lines: editingEntry.lines.map(line => ({
+        ...line,
+        debit: parseFloat(line.debit) || 0,
+        credit: parseFloat(line.credit) || 0
+      }))
+    };
+    
+    setJournalEntries(prev => 
+      prev.map(entry => entry.id === updatedEntry.id ? updatedEntry : entry)
+    );
+    setEditingEntry(null);
+  };
+  
+  const deleteEntry = (id) => {
+    setJournalEntries(prev => prev.filter(entry => entry.id !== id));
+  };
+  
+  // Add new account
+  const addNewAccount = () => {
+    if (!newAccount.code || !newAccount.name) {
+      alert('Account code and name are required');
+      return;
+    }
+    
+    if (chartOfAccounts.some(acc => acc.code === newAccount.code)) {
+      alert('Account code already exists');
+      return;
+    }
+    
+    setChartOfAccounts(prev => [...prev, { ...newAccount }]);
+    setNewAccount({ code: '', name: '', type: 'Asset', normalBalance: 'Debit', category: 'Current Asset' });
+    setShowNewAccountForm(false);
+  };
+  
+  // Add customer
+  const addCustomer = () => {
+    if (!newCustomer.name) {
+      alert('Customer name is required');
+      return;
+    }
+    setCustomers(prev => [...prev, { ...newCustomer, id: Date.now() }]);
+    setNewCustomer({ name: '', email: '', phone: '', address: '' });
+    setShowCustomerForm(false);
+  };
+  
+  // Add vendor
+  const addVendor = () => {
+    if (!newVendor.name) {
+      alert('Vendor name is required');
+      return;
+    }
+    setVendors(prev => [...prev, { ...newVendor, id: Date.now() }]);
+    setNewVendor({ name: '', email: '', phone: '', address: '' });
+    setShowVendorForm(false);
+  };
+  
+  // Add invoice
+  const addInvoice = () => {
+    if (!newInvoice.customerId || !newInvoice.amount || newInvoice.amount <= 0) {
+      alert('Valid customer and amount are required');
+      return;
+    }
+    
+    const invoice = {
+      id: Date.now(),
+      ...newInvoice,
+      amount: parseFloat(newInvoice.amount)
+    };
+    
+    setInvoices(prev => [...prev, invoice]);
+    
+    // Create journal entry for invoice
+    const journalEntry = {
+      id: Date.now(),
+      date: newInvoice.date,
+      lines: [
+        { account: '1030', debit: invoice.amount, credit: 0, description: `Invoice ${invoice.id} to ${customers.find(c => c.id === parseInt(invoice.customerId))?.name}` },
+        { account: newInvoice.revenueAccount, debit: 0, credit: invoice.amount, description: `Invoice ${invoice.id} - ${chartOfAccounts.find(acc => acc.code === newInvoice.revenueAccount)?.name}` }
+      ]
+    };
+    
+    setJournalEntries(prev => [...prev, journalEntry]);
+    setNewInvoice({ date: currentDate, dueDate: '', customerId: '', amount: 0, description: '', revenueAccount: '4010' });
+    setShowInvoiceForm(false);
+  };
+  
+  // Add bill
+  const addBill = () => {
+    if (!newBill.vendorId || !newBill.amount || newBill.amount <= 0) {
+      alert('Valid vendor and amount are required');
+      return;
+    }
+    
+    const bill = {
+      id: Date.now(),
+      ...newBill,
+      amount: parseFloat(newBill.amount)
+    };
+    
+    setBills(prev => [...prev, bill]);
+    
+    // Create journal entry for bill
+    const journalEntry = {
+      id: Date.now(),
+      date: newBill.date,
+      lines: [
+        { account: newBill.expenseAccount, debit: bill.amount, credit: 0, description: `Bill ${bill.id} from ${vendors.find(v => v.id === parseInt(bill.vendorId))?.name}` },
+        { account: '2010', debit: 0, credit: bill.amount, description: `Bill ${bill.id} - Accounts Payable` }
+      ]
+    };
+    
+    setJournalEntries(prev => [...prev, journalEntry]);
+    setNewBill({ date: currentDate, dueDate: '', vendorId: '', amount: 0, description: '', expenseAccount: '5010' });
+    setShowBillForm(false);
+  };
+  
+  // Add note
+  const addNote = () => {
+    if (!newNote.title) {
+      alert('Note title is required');
+      return;
+    }
+    setProfessionalNotes(prev => [...prev, { ...newNote, id: Date.now() }]);
+    setNewNote({ title: 'New Note', content: '' });
+    setShowNoteForm(false);
+  };
+  
+  // Export to CSV
+  const exportToCSV = () => {
+    const headers = ['Date', 'Account Code', 'Account Name', 'Debit', 'Credit', 'Description'];
+    const rows = [];
+    
+    journalEntries.forEach(entry => {
+      entry.lines.forEach(line => {
+        const account = chartOfAccounts.find(acc => acc.code === line.account);
+        rows.push([
+          entry.date,
+          line.account,
+          account ? account.name : line.account,
+          line.debit,
+          line.credit,
+          line.description
+        ]);
+      });
+    });
+    
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => 
+        row.map(field => 
+          typeof field === 'string' ? `"${field.replace(/"/g, '""')}"` : field
+        ).join(',')
+      )
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'botin_company_data.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  
+  // Render different sections
+  const renderDashboard = () => (
+    <div className={`p-6 rounded-lg border ${windowColors.dashboard}`}>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Dashboard</h2>
+        <button 
+          onClick={() => setDashboardLocked(!dashboardLocked)}
+          className="p-2 rounded-full hover:bg-gray-200"
+        >
+          {dashboardLocked ? <Lock size={20} /> : <Unlock size={20} />}
+        </button>
+      </div>
+      
+      {dashboardLocked ? (
+        <div className="text-center py-12">
+          <Lock size={48} className="mx-auto mb-4 text-gray-400" />
+          <p className="text-gray-600">Dashboard is locked</p>
+        </div>
+      ) : (
+        <>
+          {/* Company Logo and Info */}
+          <div className="flex items-start gap-6 mb-6">
+            {companyLogo ? (
+              <div className="relative">
+                <img 
+                  src={companyLogo} 
+                  alt="Botin Company Logo" 
+                  className="w-32 h-32 object-contain rounded-lg border"
+                />
+                <div className="absolute top-0 right-0 bg-black bg-opacity-50 rounded-full p-1">
+                  <Edit size={16} className="text-white cursor-pointer" 
+                    onClick={() => document.getElementById('logo-upload').click()} 
+                  />
+                </div>
+              </div>
+            ) : (
+              <label className="inline-block w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-blue-400">
+                <span className="text-gray-400 text-sm">Upload Logo</span>
+                <input 
+                  id="logo-upload"
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files[0]) {
+                      const reader = new FileReader();
+                      reader.onload = (e) => setCompanyLogo(e.target.result);
+                      reader.readAsDataURL(e.target.files[0]);
+                    }
+                  }}
+                />
+              </label>
+            )}
+            
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold mb-2">Welcome — you're experiencing the future of financial intelligence.</h3>
+              <p className="text-gray-700 mb-3">
+                I'm Jihad Muhammad Salih, a Senior Accountant and developer dedicated to bridging the gap between finance and technology. 
+                I created this AI-driven financial analysis platform to address complex business challenges through smart, automated solutions.
+              </p>
+            </div>
+          </div>
+          
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white p-4 rounded-lg shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Net Cash in Hand</p>
+                  <p className="text-2xl font-bold">${dashboardMetrics.cashPosition.toLocaleString()}</p>
+                </div>
+                <TrendingUp className="text-green-500" size={24} />
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">
+                    {dashboardMetrics.netIncome >= 0 ? 'Net Income' : 'Net Loss'}
+                  </p>
+                  <p className={`text-2xl font-bold ${dashboardMetrics.netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    ${Math.abs(dashboardMetrics.netIncome).toLocaleString()}
+                  </p>
+                </div>
+                {dashboardMetrics.netIncome >= 0 ? <TrendingUp className="text-green-500" size={24} /> : <TrendingDown className="text-red-500" size={24} />}
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Accounts Receivable</p>
+                  <p className="text-2xl font-bold">${dashboardMetrics.accountsReceivable.toLocaleString()}</p>
+                </div>
+                <BarChart3 className="text-blue-500" size={24} />
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Accounts Payable</p>
+                  <p className="text-2xl font-bold">${dashboardMetrics.accountsPayable.toLocaleString()}</p>
+                </div>
+                <AlertCircle className="text-orange-500" size={24} />
+              </div>
+            </div>
+          </div>
+          
+          {/* Today's Activity */}
+          <div className="bg-white p-4 rounded-lg shadow mb-6">
+            <h3 className="font-semibold mb-2">Today's Activity</h3>
+            <p>Journal Entries: {dashboardMetrics.todayJournalCount}</p>
+          </div>
+          
+          {/* Quick Links */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="font-semibold mb-3">Sales</h3>
+              <div className="space-y-2">
+                <button 
+                  onClick={() => setShowInvoiceForm(true)}
+                  className="flex items-center w-full p-2 text-left hover:bg-gray-100 rounded"
+                >
+                  <FileText size={16} className="mr-2" />
+                  Invoice
+                </button>
+                <button 
+                  onClick={() => setActiveTab('journal')}
+                  className="flex items-center w-full p-2 text-left hover:bg-gray-100 rounded"
+                >
+                  <Plus size={16} className="mr-2" />
+                  Journal Entry
+                </button>
+                <button 
+                  onClick={() => setActiveTab('customersVendors')}
+                  className="flex items-center w-full p-2 text-left hover:bg-gray-100 rounded"
+                >
+                  <Users size={16} className="mr-2" />
+                  Customers
+                </button>
+              </div>
+            </div>
+            
+            <div className="bg-white p-4 rounded-lg shadow">
+              <h3 className="font-semibold mb-3">Expenses</h3>
+              <div className="space-y-2">
+                <button 
+                  onClick={() => setShowBillForm(true)}
+                  className="flex items-center w-full p-2 text-left hover:bg-gray-100 rounded"
+                >
+                  <FileText size={16} className="mr-2" />
+                  Bill
+                </button>
+                <button 
+                  onClick={() => setActiveTab('journal')}
+                  className="flex items-center w-full p-2 text-left hover:bg-gray-100 rounded"
+                >
+                  <Plus size={16} className="mr-2" />
+                  Journal Entry
+                </button>
+                <button 
+                  onClick={() => setActiveTab('customersVendors')}
+                  className="flex items-center w-full p-2 text-left hover:bg-gray-100 rounded"
+                >
+                  <Building size={16} className="mr-2" />
+                  Vendors
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+  
+  const renderJournal = () => {
+    const currentEntry = editingEntry || newJournalEntry;
+    const validation = validateJournalEntry();
+    
+    return (
+      <div className={`p-6 rounded-lg border ${windowColors.journal}`}>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">Journal Entries</h2>
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={currentDate}
+              onChange={(e) => setCurrentDate(e.target.value)}
+              className="border rounded px-2 py-1"
+            />
+            <button 
+              onClick={() => setShowInvoiceForm(true)}
+              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+            >
+              New Invoice
+            </button>
+            <button 
+              onClick={() => setShowBillForm(true)}
+              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
+            >
+              New Bill
+            </button>
+          </div>
+        </div>
+        
+        {/* Validation Error */}
+        {!validation.valid && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <AlertCircle size={16} className="inline mr-2" />
+            {validation.error}
+          </div>
+        )}
+        
+        {/* New Journal Entry Form */}
+        <div className="bg-white p-4 rounded-lg shadow mb-6">
+          <h3 className="font-semibold mb-3">
+            {editingEntry ? 'Edit Journal Entry' : 'New Journal Entry'}
+          </h3>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">Date</label>
+            <input
+              type="date"
+              value={currentEntry.date}
+              onChange={(e) => editingEntry 
+                ? setEditingEntry(prev => ({ ...prev, date: e.target.value }))
+                : setNewJournalEntry(prev => ({ ...prev, date: e.target.value }))
+              }
+              className="border rounded px-2 py-1 w-full"
+            />
+          </div>
+          
+          {currentEntry.lines.map((line, index) => (
+            <div key={index} className="grid grid-cols-12 gap-2 mb-2 items-center">
+              <select
+                value={line.account}
+                onChange={(e) => {
+                  if (editingEntry) {
+                    const newLines = [...editingEntry.lines];
+                    newLines[index].account = e.target.value;
+                    setEditingEntry(prev => ({ ...prev, lines: newLines }));
+                  } else {
+                    updateJournalLine(index, 'account', e.target.value);
+                  }
+                }}
+                className={`col-span-3 border rounded px-2 py-1 ${
+                  !line.account ? 'border-red-500 bg-red-50' : ''
+                }`}
+              >
+                <option value="">Select Account</option>
+                {chartOfAccounts.map(account => (
+                  <option key={account.code} value={account.code}>
+                    {account.code} - {account.name} ({account.type})
+                  </option>
+                ))}
+              </select>
+              <input
+                type="number"
+                step="0.01"
+                value={line.debit}
+                onChange={(e) => {
+                  if (editingEntry) {
+                    const newLines = [...editingEntry.lines];
+                    newLines[index].debit = e.target.value;
+                    setEditingEntry(prev => ({ ...prev, lines: newLines }));
+                  } else {
+                    updateJournalLine(index, 'debit', e.target.value);
+                  }
+                }}
+                className={`col-span-2 border rounded px-2 py-1 ${
+                  line.debit === '' && line.credit === '' ? 'border-red-500 bg-red-50' : ''
+                }`}
+                placeholder="Debit"
+              />
+              <input
+                type="number"
+                step="0.01"
+                value={line.credit}
+                onChange={(e) => {
+                  if (editingEntry) {
+                    const newLines = [...editingEntry.lines];
+                    newLines[index].credit = e.target.value;
+                    setEditingEntry(prev => ({ ...prev, lines: newLines }));
+                  } else {
+                    updateJournalLine(index, 'credit', e.target.value);
+                  }
+                }}
+                className={`col-span-2 border rounded px-2 py-1 ${
+                  line.debit === '' && line.credit === '' ? 'border-red-500 bg-red-50' : ''
+                }`}
+                placeholder="Credit"
+              />
+              <input
+                type="text"
+                value={line.description}
+                onChange={(e) => {
+                  if (editingEntry) {
+                    const newLines = [...editingEntry.lines];
+                    newLines[index].description = e.target.value;
+                    setEditingEntry(prev => ({ ...prev, lines: newLines }));
+                  } else {
+                    updateJournalLine(index, 'description', e.target.value);
+                  }
+                }}
+                className="col-span-4 border rounded px-2 py-1"
+                placeholder="Description"
+              />
+              <button
+                onClick={() => {
+                  if (editingEntry) {
+                    const newLines = [...editingEntry.lines];
+                    newLines.splice(index, 1);
+                    setEditingEntry(prev => ({ ...prev, lines: newLines }));
+                  } else {
+                    const newLines = [...newJournalEntry.lines];
+                    newLines.splice(index, 1);
+                    setNewJournalEntry(prev => ({ ...prev, lines: newLines }));
+                  }
+                }}
+                className="col-span-1 p-1 text-red-500 hover:bg-red-100 rounded"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          ))}
+          
+          <button
+            onClick={() => {
+              if (editingEntry) {
+                const newLines = [...editingEntry.lines];
+                newLines.push({ account: '', debit: '', credit: '', description: '' });
+                setEditingEntry(prev => ({ ...prev, lines: newLines }));
+              } else {
+                addJournalLine();
+              }
+            }}
+            className="flex items-center text-blue-500 hover:text-blue-700 mb-3"
+          >
+            <Plus size={16} className="mr-1" /> Add Line
+          </button>
+          
+          <div className="flex gap-2">
+            <button
+              onClick={editingEntry ? saveEditedEntry : saveJournalEntry}
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center"
+              disabled={!validation.valid}
+            >
+              <Save size={16} className="mr-1" /> {editingEntry ? 'Update' : 'Save'} Journal Entry
+            </button>
+            {editingEntry && (
+              <button
+                onClick={() => setEditingEntry(null)}
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 flex items-center"
+              >
+                <X size={16} className="mr-1" /> Cancel
+              </button>
+            )}
+          </div>
+        </div>
+        
+        {/* Journal Entries List */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="px-4 py-3 border-b font-semibold">Existing Journal Entries</div>
+          {journalEntries
+            .filter(entry => entry.date >= dateRange.startDate && entry.date <= dateRange.endDate)
+            .map(entry => (
+              <div key={entry.id} className="border-b last:border-b-0 p-4">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="font-medium">Date: {entry.date}</div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => startEditEntry(entry)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={() => deleteEntry(entry.id)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+                {entry.lines.map((line, index) => (
+                  <div key={index} className="grid grid-cols-12 gap-2 text-sm">
+                    <div className="col-span-4">
+                      {chartOfAccounts.find(acc => acc.code === line.account)?.name || line.account}
+                    </div>
+                    <div className="col-span-2 text-right">
+                      {line.debit > 0 ? line.debit.toLocaleString() : ''}
+                    </div>
+                    <div className="col-span-2 text-right">
+                      {line.credit > 0 ? line.credit.toLocaleString() : ''}
+                    </div>
+                    <div className="col-span-4">{line.description}</div>
+                  </div>
+                ))}
+              </div>
+            ))}
+        </div>
+      </div>
+    );
+  };
+  
+  const renderTAcounts = () => (
+    <div className={`p-6 rounded-lg border ${windowColors.tAccounts}`}>
+      <h2 className="text-2xl font-bold mb-6">T-Accounts (General Ledger)</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {calculateTAcounts.map(account => (
+          <div key={account.code} className="bg-white p-4 rounded-lg shadow">
+            <h3 className="font-semibold mb-2">{account.code} - {account.name}</h3>
+            <div className="text-sm">
+              <div className="grid grid-cols-4 gap-2 font-medium border-b pb-1 mb-2">
+                <span>Date</span>
+                <span>Description</span>
+                <span>Debit</span>
+                <span>Credit</span>
+              </div>
+              {account.transactions.map((trans, index) => (
+                <div key={index} className="grid grid-cols-4 gap-2 py-1 text-sm">
+                  <span>{trans.date}</span>
+                  <span className="truncate">{trans.description}</span>
+                  <span className="text-right">{trans.debit > 0 ? trans.debit.toLocaleString() : ''}</span>
+                  <span className="text-right">{trans.credit > 0 ? trans.credit.toLocaleString() : ''}</span>
+                </div>
+              ))}
+              <div className="border-t pt-2 mt-2 font-semibold">
+                Balance: {account.balance.toLocaleString()}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  
+  const renderTrialBalance = () => (
+    <div className={`p-6 rounded-lg border ${windowColors.trialBalance}`}>
+      <h2 className="text-2xl font-bold mb-6">Trial Balance</h2>
+      
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="grid grid-cols-4 gap-4 p-4 font-semibold border-b">
+          <span>Account</span>
+          <span>Debit</span>
+          <span>Credit</span>
+          <span>Type</span>
+        </div>
+        {trialBalance.accounts.map(account => (
+          <div key={account.code} className="grid grid-cols-4 gap-4 p-4 border-b last:border-b-0">
+            <span>{account.code} - {account.name}</span>
+            <span className="text-right">{account.debit > 0 ? account.debit.toLocaleString() : ''}</span>
+            <span className="text-right">{account.credit > 0 ? account.credit.toLocaleString() : ''}</span>
+            <span>{account.type}</span>
+          </div>
+        ))}
+        <div className="grid grid-cols-4 gap-4 p-4 font-bold bg-gray-50">
+          <span>Totals</span>
+          <span className="text-right">{trialBalance.totals.debit.toLocaleString()}</span>
+          <span className="text-right">{trialBalance.totals.credit.toLocaleString()}</span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  );
+  
+  const renderProfitLoss = () => (
+    <div className={`p-6 rounded-lg border ${windowColors.profitLoss}`}>
+      <h2 className="text-2xl font-bold mb-6">Income Statement (Profit & Loss)</h2>
+      
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-semibold text-lg">Revenue</h3>
+            <div className="ml-4">
+              <div className="flex justify-between py-2">
+                <span>Service Revenue - Web Development</span>
+                <span>${
+                  calculateTAcounts.find(acc => acc.code === '4010')?.balance.toLocaleString() || '0'
+                }</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span>Consulting Revenue</span>
+                <span>${
+                  calculateTAcounts.find(acc => acc.code === '4020')?.balance.toLocaleString() || '0'
+                }</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span>Maintenance Income</span>
+                <span>${
+                  calculateTAcounts.find(acc => acc.code === '4030')?.balance.toLocaleString() || '0'
+                }</span>
+              </div>
+            </div>
+            <div className="flex justify-between font-semibold py-2 border-t mt-2">
+              <span>Total Revenue</span>
+              <span>${financialStatements.incomeStatement.revenue.toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="font-semibold text-lg">Cost of Goods Sold (COGS)</h3>
+            <div className="ml-4">
+              <div className="flex justify-between py-2">
+                <span>Developer Salaries</span>
+                <span>${
+                  calculateTAcounts.find(acc => acc.code === '5010')?.balance.toLocaleString() || '0'
+                }</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span>Hosting & Server Costs</span>
+                <span>${
+                  calculateTAcounts.find(acc => acc.code === '5020')?.balance.toLocaleString() || '0'
+                }</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span>Software Subscriptions</span>
+                <span>${
+                  calculateTAcounts.find(acc => acc.code === '5030')?.balance.toLocaleString() || '0'
+                }</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span>Subcontractor Fees</span>
+                <span>${
+                  calculateTAcounts.find(acc => acc.code === '5040')?.balance.toLocaleString() || '0'
+                }</span>
+              </div>
+            </div>
+            <div className="flex justify-between font-semibold py-2 border-t mt-2">
+              <span>Total COGS</span>
+              <span>${financialStatements.incomeStatement.cogs.toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <div className="flex justify-between font-bold py-2 border-t">
+            <span>Gross Profit</span>
+            <span>${financialStatements.incomeStatement.grossProfit.toLocaleString()}</span>
+          </div>
+          
+          <div>
+            <h3 className="font-semibold text-lg">Operating Expenses</h3>
+            <div className="ml-4">
+              {calculateTAcounts
+                .filter(acc => acc.type === 'Expense')
+                .map(acc => (
+                  <div key={acc.code} className="flex justify-between py-2">
+                    <span>{acc.name}</span>
+                    <span>${acc.balance.toLocaleString()}</span>
+                  </div>
+                ))}
+            </div>
+            <div className="flex justify-between font-semibold py-2 border-t mt-2">
+              <span>Total Expenses</span>
+              <span>${financialStatements.incomeStatement.expenses.toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <div className="flex justify-between font-bold py-2 border-t">
+            <span>Operating Profit</span>
+            <span>${financialStatements.incomeStatement.operatingProfit.toLocaleString()}</span>
+          </div>
+          
+          <div>
+            <h3 className="font-semibold text-lg">Other Income/Expenses</h3>
+            <div className="ml-4">
+              <div className="flex justify-between py-2">
+                <span>Other Income</span>
+                <span>${
+                  calculateTAcounts.find(acc => acc.code === '7010')?.balance.toLocaleString() || '0'
+                }</span>
+              </div>
+              <div className="flex justify-between py-2">
+                <span>Other Expenses</span>
+                <span>${
+                  calculateTAcounts.find(acc => acc.code === '7020')?.balance.toLocaleString() || '0'
+                }</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex justify-between font-bold text-lg py-4 border-t border-2">
+            <span>{financialStatements.incomeStatement.netProfit >= 0 ? 'Net Income' : 'Net Loss'}</span>
+            <span className={financialStatements.incomeStatement.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}>
+              ${Math.abs(financialStatements.incomeStatement.netProfit).toLocaleString()}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  
+  const renderBalanceSheet = () => (
+    <div className={`p-6 rounded-lg border ${windowColors.balanceSheet}`}>
+      <h2 className="text-2xl font-bold mb-6">Balance Sheet</h2>
+      
+      <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Assets</h3>
+            {calculateTAcounts
+              .filter(acc => acc.type === 'Asset')
+              .map(acc => (
+                <div key={acc.code} className="flex justify-between py-2">
+                  <span>{acc.name}</span>
+                  <span>${Math.abs(acc.balance).toLocaleString()}</span>
+                </div>
+              ))}
+            <div className="flex justify-between font-bold py-2 border-t mt-2">
+              <span>Total Assets</span>
+              <span>${financialStatements.balanceSheet.assets.toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="font-semibold text-lg mb-4">Liabilities & Equity</h3>
+            <div className="mb-4">
+              <h4 className="font-medium mb-2">Liabilities</h4>
+              {calculateTAcounts
+                .filter(acc => acc.type === 'Liability')
+                .map(acc => (
+                  <div key={acc.code} className="flex justify-between py-2 ml-4">
+                    <span>{acc.name}</span>
+                    <span>${Math.abs(acc.balance).toLocaleString()}</span>
+                  </div>
+                ))}
+              <div className="flex justify-between font-semibold py-2 border-t mt-2 ml-4">
+                <span>Total Liabilities</span>
+                <span>${financialStatements.balanceSheet.liabilities.toLocaleString()}</span>
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-2">Equity</h4>
+              {calculateTAcounts
+                .filter(acc => acc.type === 'Equity')
+                .map(acc => {
+                  const displayBalance = acc.code === '3030' 
+                    ? (acc.balance >= 0 ? acc.balance : acc.balance) // Keep negative for loss
+                    : acc.balance;
+                  return (
+                    <div key={acc.code} className="flex justify-between py-2 ml-4">
+                      <span>{acc.name}</span>
+                      <span className={displayBalance < 0 ? 'text-red-600' : ''}>
+                        ${Math.abs(displayBalance).toLocaleString()}
+                        {displayBalance < 0 ? ' (Loss)' : ''}
+                      </span>
+                    </div>
+                  );
+                })}
+              <div className="flex justify-between font-semibold py-2 border-t mt-2 ml-4">
+                <span>Total Equity</span>
+                <span>${financialStatements.balanceSheet.equity.toLocaleString()}</span>
+              </div>
+            </div>
+            
+            <div className="flex justify-between font-bold py-2 border-t mt-4">
+              <span>Total Liabilities & Equity</span>
+              <span>${
+                (financialStatements.balanceSheet.liabilities + financialStatements.balanceSheet.equity).toLocaleString()
+              }</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  
+  const renderChartOfAccounts = () => (
+    <div className={`p-6 rounded-lg border ${windowColors.chartOfAccounts}`}>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Chart of Accounts</h2>
+        <button 
+          onClick={() => setShowNewAccountForm(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center"
+        >
+          <Plus size={16} className="mr-1" /> Add Account
+        </button>
+      </div>
+      
+      {showNewAccountForm && (
+        <div className="bg-white p-4 rounded-lg shadow mb-6">
+          <h3 className="font-semibold mb-3">Add New Account</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Account Code</label>
+              <input
+                type="text"
+                value={newAccount.code}
+                onChange={(e) => setNewAccount(prev => ({ ...prev, code: e.target.value }))}
+                className="border rounded px-2 py-1 w-full"
+                placeholder="e.g., 1010"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Account Name</label>
+              <input
+                type="text"
+                value={newAccount.name}
+                onChange={(e) => setNewAccount(prev => ({ ...prev, name: e.target.value }))}
+                className="border rounded px-2 py-1 w-full"
+                placeholder="e.g., Cash"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Account Type</label>
+              <select
+                value={newAccount.type}
+                onChange={(e) => setNewAccount(prev => ({ ...prev, type: e.target.value }))}
+                className="border rounded px-2 py-1 w-full"
+              >
+                <option value="Asset">Asset</option>
+                <option value="Liability">Liability</option>
+                <option value="Equity">Equity</option>
+                <option value="Revenue">Revenue</option>
+                <option value="COGS">COGS</option>
+                <option value="Expense">Expense</option>
+                <option value="Other Income">Other Income</option>
+                <option value="Other Expense">Other Expense</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Normal Balance</label>
+              <select
+                value={newAccount.normalBalance}
+                onChange={(e) => setNewAccount(prev => ({ ...prev, normalBalance: e.target.value }))}
+                className="border rounded px-2 py-1 w-full"
+              >
+                <option value="Debit">Debit</option>
+                <option value="Credit">Credit</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Category</label>
+              <input
+                type="text"
+                value={newAccount.category}
+                onChange={(e) => setNewAccount(prev => ({ ...prev, category: e.target.value }))}
+                className="border rounded px-2 py-1 w-full"
+                placeholder="e.g., Current Asset"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={addNewAccount}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+              Save Account
+            </button>
+            <button
+              onClick={() => setShowNewAccountForm(false)}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="grid grid-cols-5 gap-4 p-4 font-semibold border-b">
+          <span>Code</span>
+          <span>Name</span>
+          <span>Type</span>
+          <span>Normal Balance</span>
+          <span>Category</span>
+        </div>
+        {chartOfAccounts.map(account => (
+          <div key={account.code} className="grid grid-cols-5 gap-4 p-4 border-b last:border-b-0">
+            <span>{account.code}</span>
+            <span>{account.name}</span>
+            <span>{account.type}</span>
+            <span>{account.normalBalance}</span>
+            <span>{account.category}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+  
+  const renderNotes = () => (
+    <div className={`p-6 rounded-lg border ${windowColors.notes}`}>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Professional Notes</h2>
+        <button 
+          onClick={() => setShowNoteForm(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center"
+        >
+          <Plus size={16} className="mr-1" /> Add Note
+        </button>
+      </div>
+      
+      {showNoteForm && (
+        <div className="bg-white p-4 rounded-lg shadow mb-6">
+          <h3 className="font-semibold mb-3">Create New Note</h3>
+          <div className="space-y-3">
+            <input
+              type="text"
+              placeholder="Note Title"
+              value={newNote.title}
+              onChange={(e) => setNewNote(prev => ({ ...prev, title: e.target.value }))}
+              className="border rounded px-3 py-2 w-full"
+            />
+            <textarea
+              placeholder="Note Content"
+              value={newNote.content}
+              onChange={(e) => setNewNote(prev => ({ ...prev, content: e.target.value }))}
+              className="border rounded px-3 py-2 w-full h-32 resize-none"
+            />
+          </div>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={addNote}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+              Save Note
+            </button>
+            <button
+              onClick={() => setShowNoteForm(false)}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {professionalNotes.map(note => (
+          <div key={note.id} className="bg-white p-4 rounded-lg shadow">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-semibold">{note.title}</h3>
+              <button className="text-red-500 hover:text-red-700">
+                <Trash2 size={16} />
+              </button>
+            </div>
+            <p className="text-sm text-gray-600 whitespace-pre-wrap">{note.content}</p>
+          </div>
+        ))}
+        {professionalNotes.length === 0 && (
+          <div className="col-span-full text-center py-8 text-gray-500">
+            No notes created yet. Click "Add Note" to create your first note.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+  
+  const renderCustomersVendors = () => (
+    <div className={`p-6 rounded-lg border ${windowColors.customersVendors}`}>
+      <h2 className="text-2xl font-bold mb-6">Customers & Vendors</h2>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Customers Section */}
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-semibold text-lg">Customers</h3>
+            <button 
+              onClick={() => setShowCustomerForm(true)}
+              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 flex items-center"
+            >
+              <Plus size={16} className="mr-1" /> Add Customer
+            </button>
+          </div>
+          <div className="overflow-hidden">
+            <div className="grid grid-cols-4 gap-2 p-2 font-semibold border-b bg-gray-50">
+              <span>Name</span>
+              <span>Email</span>
+              <span>Phone</span>
+              <span>Actions</span>
+            </div>
+            {customers.map(customer => (
+              <div key={customer.id} className="grid grid-cols-4 gap-2 p-2 border-b last:border-b-0">
+                <span>{customer.name}</span>
+                <span>{customer.email}</span>
+                <span>{customer.phone}</span>
+                <div className="flex gap-1">
+                  <button className="text-blue-500 hover:text-blue-700">
+                    <Edit size={14} />
+                  </button>
+                  <button className="text-red-500 hover:text-red-700">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {customers.length === 0 && (
+              <div className="text-center py-4 text-gray-500">
+                No customers added yet
+              </div>
+            )}
+          </div>
+          
+          {/* Linked Invoices */}
+          <div className="mt-6">
+            <h4 className="font-medium mb-2">Customer Invoices</h4>
+            {invoices.length > 0 ? (
+              <div className="space-y-2">
+                {invoices.map(invoice => {
+                  const customer = customers.find(c => c.id === parseInt(invoice.customerId));
+                  return (
+                    <div key={invoice.id} className="text-sm p-2 bg-gray-50 rounded">
+                      <div className="font-medium">{customer?.name || 'Unknown Customer'}</div>
+                      <div>Amount: ${invoice.amount.toLocaleString()}</div>
+                      <div>Date: {invoice.date}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No invoices created yet</p>
+            )}
+          </div>
+        </div>
+        
+        {/* Vendors Section */}
+        <div className="bg-white p-4 rounded-lg shadow">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-semibold text-lg">Vendors</h3>
+            <button 
+              onClick={() => setShowVendorForm(true)}
+              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 flex items-center"
+            >
+              <Plus size={16} className="mr-1" /> Add Vendor
+            </button>
+          </div>
+          <div className="overflow-hidden">
+            <div className="grid grid-cols-4 gap-2 p-2 font-semibold border-b bg-gray-50">
+              <span>Name</span>
+              <span>Email</span>
+              <span>Phone</span>
+              <span>Actions</span>
+            </div>
+            {vendors.map(vendor => (
+              <div key={vendor.id} className="grid grid-cols-4 gap-2 p-2 border-b last:border-b-0">
+                <span>{vendor.name}</span>
+                <span>{vendor.email}</span>
+                <span>{vendor.phone}</span>
+                <div className="flex gap-1">
+                  <button className="text-blue-500 hover:text-blue-700">
+                    <Edit size={14} />
+                  </button>
+                  <button className="text-red-500 hover:text-red-700">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {vendors.length === 0 && (
+              <div className="text-center py-4 text-gray-500">
+                No vendors added yet
+              </div>
+            )}
+          </div>
+          
+          {/* Linked Bills */}
+          <div className="mt-6">
+            <h4 className="font-medium mb-2">Vendor Bills</h4>
+            {bills.length > 0 ? (
+              <div className="space-y-2">
+                {bills.map(bill => {
+                  const vendor = vendors.find(v => v.id === parseInt(bill.vendorId));
+                  return (
+                    <div key={bill.id} className="text-sm p-2 bg-gray-50 rounded">
+                      <div className="font-medium">{vendor?.name || 'Unknown Vendor'}</div>
+                      <div>Amount: ${bill.amount.toLocaleString()}</div>
+                      <div>Date: {bill.date}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No bills created yet</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  
+  const renderCustomerForm = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg max-w-md w-full">
+        <h3 className="text-xl font-semibold mb-4">Add Customer</h3>
+        <div className="space-y-3">
+          <input
+            type="text"
+            placeholder="Name"
+            value={newCustomer.name}
+            onChange={(e) => setNewCustomer(prev => ({ ...prev, name: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={newCustomer.email}
+            onChange={(e) => setNewCustomer(prev => ({ ...prev, email: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <input
+            type="text"
+            placeholder="Phone"
+            value={newCustomer.phone}
+            onChange={(e) => setNewCustomer(prev => ({ ...prev, phone: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <input
+            type="text"
+            placeholder="Address"
+            value={newCustomer.address}
+            onChange={(e) => setNewCustomer(prev => ({ ...prev, address: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+        </div>
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={addCustomer}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Save Customer
+          </button>
+          <button
+            onClick={() => setShowCustomerForm(false)}
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+  
+  const renderVendorForm = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg max-w-md w-full">
+        <h3 className="text-xl font-semibold mb-4">Add Vendor</h3>
+        <div className="space-y-3">
+          <input
+            type="text"
+            placeholder="Name"
+            value={newVendor.name}
+            onChange={(e) => setNewVendor(prev => ({ ...prev, name: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={newVendor.email}
+            onChange={(e) => setNewVendor(prev => ({ ...prev, email: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <input
+            type="text"
+            placeholder="Phone"
+            value={newVendor.phone}
+            onChange={(e) => setNewVendor(prev => ({ ...prev, phone: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <input
+            type="text"
+            placeholder="Address"
+            value={newVendor.address}
+            onChange={(e) => setNewVendor(prev => ({ ...prev, address: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+        </div>
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={addVendor}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Save Vendor
+          </button>
+          <button
+            onClick={() => setShowVendorForm(false)}
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+  
+  const renderInvoiceForm = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg max-w-md w-full">
+        <h3 className="text-xl font-semibold mb-4">Create Invoice</h3>
+        <div className="space-y-3">
+          <input
+            type="date"
+            value={newInvoice.date}
+            onChange={(e) => setNewInvoice(prev => ({ ...prev, date: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <input
+            type="date"
+            value={newInvoice.dueDate}
+            onChange={(e) => setNewInvoice(prev => ({ ...prev, dueDate: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <select
+            value={newInvoice.customerId}
+            onChange={(e) => setNewInvoice(prev => ({ ...prev, customerId: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          >
+            <option value="">Select Customer</option>
+            {customers.map(customer => (
+              <option key={customer.id} value={customer.id}>{customer.name}</option>
+            ))}
+          </select>
+          <select
+            value={newInvoice.revenueAccount}
+            onChange={(e) => setNewInvoice(prev => ({ ...prev, revenueAccount: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          >
+            <option value="">Select Revenue Account</option>
+            {chartOfAccounts
+              .filter(acc => acc.type === 'Revenue')
+              .map(account => (
+                <option key={account.code} value={account.code}>
+                  {account.code} - {account.name}
+                </option>
+              ))}
+          </select>
+          <input
+            type="number"
+            step="0.01"
+            placeholder="Amount"
+            value={newInvoice.amount}
+            onChange={(e) => setNewInvoice(prev => ({ ...prev, amount: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <input
+            type="text"
+            placeholder="Description"
+            value={newInvoice.description}
+            onChange={(e) => setNewInvoice(prev => ({ ...prev, description: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+        </div>
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={addInvoice}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Create Invoice
+          </button>
+          <button
+            onClick={() => setShowInvoiceForm(false)}
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+  
+  const renderBillForm = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg max-w-md w-full">
+        <h3 className="text-xl font-semibold mb-4">Create Bill</h3>
+        <div className="space-y-3">
+          <input
+            type="date"
+            value={newBill.date}
+            onChange={(e) => setNewBill(prev => ({ ...prev, date: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <input
+            type="date"
+            value={newBill.dueDate}
+            onChange={(e) => setNewBill(prev => ({ ...prev, dueDate: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <select
+            value={newBill.vendorId}
+            onChange={(e) => setNewBill(prev => ({ ...prev, vendorId: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          >
+            <option value="">Select Vendor</option>
+            {vendors.map(vendor => (
+              <option key={vendor.id} value={vendor.id}>{vendor.name}</option>
+            ))}
+          </select>
+          <select
+            value={newBill.expenseAccount}
+            onChange={(e) => setNewBill(prev => ({ ...prev, expenseAccount: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          >
+            <option value="">Select Expense/COGS Account</option>
+            {chartOfAccounts
+              .filter(acc => acc.type === 'Expense' || acc.type === 'COGS')
+              .map(account => (
+                <option key={account.code} value={account.code}>
+                  {account.code} - {account.name} ({account.type})
+                </option>
+              ))}
+          </select>
+          <input
+            type="number"
+            step="0.01"
+            placeholder="Amount"
+            value={newBill.amount}
+            onChange={(e) => setNewBill(prev => ({ ...prev, amount: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+          <input
+            type="text"
+            placeholder="Description"
+            value={newBill.description}
+            onChange={(e) => setNewBill(prev => ({ ...prev, description: e.target.value }))}
+            className="border rounded px-3 py-2 w-full"
+          />
+        </div>
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={addBill}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Create Bill
+          </button>
+          <button
+            onClick={() => setShowBillForm(false)}
+            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+  
+  const renderSettingsMenu = () => (
+    <div className="fixed bottom-16 right-4 bg-white p-4 rounded-lg shadow-lg border z-50 w-64">
+      <div className="flex border-b mb-2">
+        <button
+          onClick={() => setSettingsTab('color')}
+          className={`px-3 py-2 text-sm font-medium ${
+            settingsTab === 'color' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
+          }`}
+        >
+          <Settings size={16} className="inline mr-1" /> Color
+        </button>
+        <button
+          onClick={() => setSettingsTab('font')}
+          className={`px-3 py-2 text-sm font-medium ${
+            settingsTab === 'font' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
+          }`}
+        >
+          <Type size={16} className="inline mr-1" /> Font
+        </button>
+        <button
+          onClick={() => setSettingsTab('calculator')}
+          className={`px-3 py-2 text-sm font-medium ${
+            settingsTab === 'calculator' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
+          }`}
+        >
+          <Calculator size={16} className="inline mr-1" /> Calculator
+        </button>
+      </div>
+      
+      {settingsTab === 'color' && (
+        <div>
+          <h3 className="font-semibold mb-2">Window Color</h3>
+          <div className="grid grid-cols-5 gap-1">
+            {colorOptions.map(color => (
+              <button
+                key={color.name}
+                onClick={() => {
+                  setSelectedColors(prev => ({ ...prev, [activeTab]: color.name }));
+                  setWindowColors(prev => ({ 
+                    ...prev, 
+                    [activeTab]: color.class.split(' ')[0] 
+                  }));
+                  setShowSettingsMenu(false);
+                }}
+                className={`w-6 h-6 rounded ${color.class.split(' ')[0]} border-2 ${
+                  selectedColors[activeTab] === color.name ? 'border-gray-800' : 'border-transparent'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {settingsTab === 'font' && (
+        <div>
+          <h3 className="font-semibold mb-2">Font Family</h3>
+          <select
+            value={selectedFont}
+            onChange={(e) => {
+              setSelectedFont(e.target.value);
+              setShowSettingsMenu(false);
+            }}
+            className="w-full p-2 border rounded"
+          >
+            {fontOptions.map(font => (
+              <option key={font} value={font}>{font}</option>
+            ))}
+          </select>
+        </div>
+      )}
+      
+      {settingsTab === 'calculator' && (
+        <div className="max-h-96 overflow-y-auto">
+          <h3 className="font-semibold mb-3">Financial Ratios Calculator</h3>
+          
+          <div className="space-y-4 text-xs">
+            <div>
+              <h4 className="font-medium mb-2 text-blue-600">💧 Liquidity Ratios (Short-term financial health)</h4>
+              <ul className="space-y-1">
+                <li>• Current Ratio = Current Assets ÷ Current Liabilities</li>
+                <li>• Quick Ratio = (Current Assets − Inventory) ÷ Current Liabilities</li>
+                <li>• Cash Ratio = Cash ÷ Current Liabilities</li>
+                <li>• Working Capital = Current Assets − Current Liabilities</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-2 text-green-600">💰 Profitability Ratios (Earning performance)</h4>
+              <ul className="space-y-1">
+                <li>• Gross Profit Margin = (Revenue − COGS) ÷ Revenue</li>
+                <li>• Operating Margin = Operating Income ÷ Revenue</li>
+                <li>• Net Profit Margin = Net Income ÷ Revenue</li>
+                <li>• Return on Assets (ROA) = Net Income ÷ Total Assets</li>
+                <li>• Return on Equity (ROE) = Net Income ÷ Shareholders’ Equity</li>
+                <li>• Return on Investment (ROI) = Net Profit ÷ Investment</li>
+                <li>• EBITDA Margin = EBITDA ÷ Revenue</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-2 text-purple-600">⚙️ Efficiency / Activity Ratios (Asset utilization)</h4>
+              <ul className="space-y-1">
+                <li>• Inventory Turnover = COGS ÷ Average Inventory</li>
+                <li>• Receivable Turnover = Net Credit Sales ÷ Average A/R</li>
+                <li>• Payable Turnover = COGS ÷ Average A/P</li>
+                <li>• Asset Turnover = Net Sales ÷ Total Assets</li>
+                <li>• Working Capital Turnover = Sales ÷ Working Capital</li>
+                <li>• Days Inventory Outstanding (DIO) = 365 ÷ Inventory Turnover</li>
+                <li>• Days Sales Outstanding (DSO) = 365 ÷ Receivable Turnover</li>
+                <li>• Days Payable Outstanding (DPO) = 365 ÷ Payable Turnover</li>
+                <li>• Cash Conversion Cycle (CCC) = DIO + DSO − DPO</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-2 text-red-600">🏦 Leverage / Solvency Ratios (Long-term stability)</h4>
+              <ul className="space-y-1">
+                <li>• Debt Ratio = Total Debt ÷ Total Assets</li>
+                <li>• Debt-to-Equity Ratio = Total Debt ÷ Equity</li>
+                <li>• Equity Ratio = Equity ÷ Total Assets</li>
+                <li>• Interest Coverage Ratio = EBIT ÷ Interest Expense</li>
+                <li>• Debt Service Coverage Ratio (DSCR) = Net Operating Income ÷ Total Debt Service</li>
+                <li>• Financial Leverage Ratio = Total Assets ÷ Total Equity</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-2 text-yellow-600">📈 Market Ratios (For valuation and investors)</h4>
+              <ul className="space-y-1">
+                <li>• Earnings per Share (EPS) = Net Income ÷ Outstanding Shares</li>
+                <li>• Price-to-Earnings (P/E) = Market Price per Share ÷ EPS</li>
+                <li>• Book Value per Share = Equity ÷ Outstanding Shares</li>
+                <li>• Dividend Yield = Dividend per Share ÷ Market Price per Share</li>
+                <li>• Dividend Payout Ratio = Dividends ÷ Net Income</li>
+                <li>• Market-to-Book Ratio = Market Value per Share ÷ Book Value per Share</li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-2 text-indigo-600">🧠 Bonus: Key Combined Ratios</h4>
+              <ul className="space-y-1">
+                <li>• Operating Cycle = DIO + DSO</li>
+                <li>• Net Operating Cycle (Cash Conversion Cycle) = Operating Cycle − DPO</li>
+                <li>• EBITDA Coverage = EBITDA ÷ Interest Expense</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="mt-3 pt-3 border-t">
+        <div className="flex items-center gap-2 mb-2">
+          <Info size={16} className="text-blue-500" />
+          <span className="font-medium">About</span>
+        </div>
+        <p className="text-xs text-gray-600 mb-2">
+          Botin Company - AI-driven financial analysis platform by Jihad Muhammad Salih
+        </p>
+        <div className="flex items-center gap-2">
+          <MessageCircle size={16} className="text-green-500" />
+          <a href="mailto:www.jihad.m.salih@gmail.com" className="text-xs text-blue-600 hover:underline">
+            www.jihad.m.salih@gmail.com
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+  
+  const tabs = [
+    { id: 'dashboard', name: 'Dashboard', icon: BarChart3 },
+    { id: 'journal', name: 'Journal', icon: FileText },
+    { id: 'tAccounts', name: 'T Accounts', icon: Users },
+    { id: 'trialBalance', name: 'Trial Balance', icon: TrendingUp },
+    { id: 'profitLoss', name: 'Profit & Loss', icon: TrendingUp },
+    { id: 'balanceSheet', name: 'Balance Sheet', icon: Building },
+    { id: 'chartOfAccounts', name: 'Chart of Accounts', icon: Settings },
+    { id: 'notes', name: 'Professional Notes', icon: Edit },
+    { id: 'customersVendors', name: 'Customers & Vendors', icon: Users }
+  ];
+  
+  return (
+    <div className="min-h-screen bg-gray-100" style={{ fontFamily: selectedFont }}>
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              {companyLogo ? (
+                <img src={companyLogo} alt="Botin Company" className="h-8 w-auto mr-3" />
+              ) : (
+                <div className="h-8 w-8 bg-blue-500 rounded mr-3 flex items-center justify-center">
+                  <span className="text-white font-bold">B</span>
+                </div>
+              )}
+              <h1 className="text-xl font-bold">Botin Company</h1>
+            </div>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={exportToCSV}
+                className="flex items-center text-gray-600 hover:text-gray-900"
+              >
+                <Download size={20} className="mr-1" /> Export
+              </button>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={dateRange.startDate}
+                  onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                  className="border rounded px-2 py-1 text-sm"
+                />
+                <span className="text-gray-500">to</span>
+                <input
+                  type="date"
+                  value={dateRange.endDate}
+                  onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                  className="border rounded px-2 py-1 text-sm"
+                />
+                <button 
+                  onClick={() => setIsRunning(!isRunning)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
+                >
+                  Run
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex space-x-8 overflow-x-auto pb-2">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <tab.icon size={16} className="mr-2" />
+                {tab.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+      
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'dashboard' && renderDashboard()}
+        {activeTab === 'journal' && renderJournal()}
+        {activeTab === 'tAccounts' && renderTAcounts()}
+        {activeTab === 'trialBalance' && renderTrialBalance()}
+        {activeTab === 'profitLoss' && renderProfitLoss()}
+        {activeTab === 'balanceSheet' && renderBalanceSheet()}
+        {activeTab === 'chartOfAccounts' && renderChartOfAccounts()}
+        {activeTab === 'notes' && renderNotes()}
+        {activeTab === 'customersVendors' && renderCustomersVendors()}
+      </main>
+      
+      {/* Settings Button */}
+      <button
+        onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+        className="fixed bottom-4 right-4 bg-white p-2 rounded-lg shadow-lg border hover:bg-gray-50 z-40"
+      >
+        <Settings size={20} />
+      </button>
+      
+      {/* Settings Menu */}
+      {showSettingsMenu && renderSettingsMenu()}
+      
+      {/* Modals */}
+      {showCustomerForm && renderCustomerForm()}
+      {showVendorForm && renderVendorForm()}
+      {showInvoiceForm && renderInvoiceForm()}
+      {showBillForm && renderBillForm()}
+      {showNoteForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full">
+            <h3 className="text-xl font-semibold mb-4">Create New Note</h3>
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder="Note Title"
+                value={newNote.title}
+                onChange={(e) => setNewNote(prev => ({ ...prev, title: e.target.value }))}
+                className="border rounded px-3 py-2 w-full"
+              />
+              <textarea
+                placeholder="Note Content"
+                value={newNote.content}
+                onChange={(e) => setNewNote(prev => ({ ...prev, content: e.target.value }))}
+                className="border rounded px-3 py-2 w-full h-32 resize-none"
+              />
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button
+                onClick={addNote}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                Save Note
+              </button>
+              <button
+                onClick={() => setShowNoteForm(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default App;
+```
